@@ -1,0 +1,317 @@
+Sub FECHA()
+ActiveCell.FormulaR1C1 = "=NOW()"
+Selection.Copy
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+End Sub
+_____________________________________________________________________________
+Sub VALIDAR_OCUPACION()
+ActiveCell.Offset(-1, 0).Select
+Dim NroFila As Integer
+NroFila = ActiveCell.Row
+If Range(“F” & NroFila) = Empty Then
+Exit Sub
+Else
+GoTo Line3
+End If
+Line3:
+Dim Alfa As String
+Dim uno As Variant
+Dim dos As String
+Dim tres As Variant
+Set uno = Worksheets(“Kardex”).Range(“B:B”)
+dos = Range(“I” & NroFila).Value
+Set tres = Worksheets(“Kardex”).Range(“L:L”)
+Alfa = Application.WorksheetFunction.SumIf(uno, dos, tres)
+If Alfa > 0 Then
+MsgBox “Localidad ocupada”
+GoTo Line1
+Else
+GoTo Line2
+End If
+Line1:
+Dim resp As Integer
+resp = MsgBox(“Ingresar Item”, vbYesNo, “Localidad multiple”)
+If resp = vbYes Then
+GoTo Line2
+Else
+End If
+If resp = vbNo Then
+Range(“F” & NroFila).ClearContents
+Else
+End If
+Line2:
+ActiveCell.Offset(1, 0).Select
+End Sub
+_____________________________________________________________________________
+Sub BUSQUEDA()
+UserForm5.Show
+Dim Respuesta As Integer
+Respuesta = MsgBox("¿Desea añadir linea a pedidos?", vbYesNo, "Pedidos")
+If Respuesta = vbYes Then
+Call BUSCANDO
+Else
+End If
+If Respuesta = vbNo Then
+MsgBox "Busquda completada"
+Else
+End If
+Dim Value As String
+Value = MsgBox("¿Desea agregar otro Item?", vbYesNo, "Pedido")
+If Value = vbYes Then
+Call BUSQUEDA
+Else
+End If
+If Value = vbNo Then
+Sheets("Salidas").Select
+Else
+End If
+End Sub
+_____________________________________________________________________________
+Sub BUSCANDO()
+Dim Message, Title, Default, MyValue
+Message = "Ingrese la linea del producto a agregar"
+Title = "Datos del producto"
+Default = "Line"
+MyValue = InputBox(Message, Title, Default)
+Range("D" & MyValue).Select
+Selection.Copy
+Sheets("Salidas").Select
+Range("A4").Select
+Do While ActiveCell <> Empty
+ActiveCell.Offset(1, 0).Select
+Loop
+Dim NroFila As Integer
+NroFila = ActiveCell.Row
+Range("A" & NroFila).Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Sheets("Kardex").Select
+Range("E" & MyValue).Select
+Selection.Copy
+Sheets("Salidas").Select
+Range("B" & NroFila).Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Sheets("Kardex").Select
+Range("F" & MyValue).Select
+Selection.Copy
+Sheets("Salidas").Select
+Range("C" & NroFila).Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Sheets("Kardex").Select
+Range("M" & MyValue).Select
+Selection.Copy
+Sheets("Salidas").Select
+Range("F" & NroFila).Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Message = "Ingrese cantidad"
+Title = "Datos del producto"
+Default = "Cantidad"
+MyValue = InputBox(Message, Title, Default)
+Range("E" & NroFila).Select
+Selection.Value = MyValue
+Sheets("Kardex").Select
+Application.CutCopyMode = False
+End Sub
+_____________________________________________________________________________
+Sub RASTREO()
+Dim Message, Title, Default, MyValue
+Message = "Ingrese la celda del pedido"
+Title = "Datos de rastreo"
+Default = "Line"
+MyValue = InputBox(Message, Title, Default)
+If MyValue = "" Then
+MsgBox "Proceso cancelado"
+Else
+Range("D" & MyValue).Select
+Selection.Copy
+Sheets("Rastreos").Select
+Range("E2").Select
+Do While ActiveCell <> Empty
+ActiveCell.Offset(1, 0).Select
+Loop
+Dim NroFila As Integer
+NroFila = ActiveCell.Row
+Range("C" & NroFila).Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+ActiveCell.Offset(0, 7).Select
+ActiveCell.FormulaR1C1 = "=SUMIF(Salidas!C[-6],Rastreos!RC[-7],Salidas!C[-5])"
+Selection.Copy
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+ActiveCell.Offset(0, -6).Select
+Message = "Ingrese N° de sello"
+Title = "Datos de rastreo"
+Default = "N/A"
+MyValue = InputBox(Message, Title, Default)
+Selection.Value = MyValue
+ActiveCell.Offset(0, 1).Select
+UserForm1.Show
+ActiveCell.Offset(0, 1).Select
+UserForm8.Show
+ActiveCell.Offset(0, 1).Select
+UserForm2.Show
+ActiveCell.Offset(0, 1).Select
+End If
+Message = "Nombre del operador"
+Title = "Datos de rastreo"
+Default = "Nombre"
+MyValue = InputBox(Message, Title, Default)
+Selection.Value = MyValue
+ActiveCell.Offset(0, 1).Select
+Call FECHA
+Range("C" & NroFila).Select
+Range(Selection, Selection.End(xlToRight)).Select
+Call BORDES
+Sheets("Salidas").Select
+End Sub
+_____________________________________________________________________________
+Sub BORDES()
+With Selection.Borders(xlEdgeLeft)
+.LineStyle = xlContinuous
+.ColorIndex = 0
+.TintAndShade = 0
+.Weight = xlThin
+End With
+With Selection.Borders(xlEdgeTop)
+.LineStyle = xlContinuous
+.ColorIndex = 0
+.TintAndShade = 0
+.Weight = xlThin
+End With
+With Selection.Borders(xlEdgeBottom)
+.LineStyle = xlContinuous
+.ColorIndex = 0
+.TintAndShade = 0
+.Weight = xlThin
+End With
+With Selection.Borders(xlEdgeRight)
+.LineStyle = xlContinuous
+.ColorIndex = 0
+.TintAndShade = 0
+.Weight = xlThin
+End With
+With Selection.Borders(xlInsideVertical)
+.LineStyle = xlContinuous
+.ColorIndex = 0
+.TintAndShade = 0
+.Weight = xlThin
+End With
+With Selection.Borders(xlInsideHorizontal)
+.LineStyle = xlContinuous
+.ColorIndex = 0
+.TintAndShade = 0
+.Weight = xlThin
+End With
+End Sub
+_____________________________________________________________________________
+Sub RUTA_DE_SURTIDO()
+Sheets("Ruta SS").Select
+Range("A4:R1000").ClearContents
+Sheets("Salidas").Select
+Dim Message, Title, Default, MyValue
+Message = "Ingrese Dato del concentrado"
+Title = "Datos del producto"
+Default = "Concentrado"
+MyValue = InputBox(Message, Title, Default)
+Range("A4").Select
+Range(Selection, Selection.End(xlToRight)).Select
+Selection.AutoFilter
+ActiveSheet.Range("$A$4:$P$1000").AutoFilter Field:=8, Criteria1:=MyValue
+Range("A4").Select
+Range(Selection, Selection.End(xlDown)).Select
+Range(Selection, Selection.End(xlToRight)).Select
+Selection.Copy
+Sheets("Ruta SS").Select
+Range("A3").Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Range("A3:O3").Select
+If Selection.AutoFilter = False Then
+Selection.AutoFilter
+Else
+End If
+Range("A3").Select
+Application.CutCopyMode = False
+ActiveWorkbook.Worksheets("Ruta SS").AutoFilter.Sort.SortFields.Clear
+ActiveWorkbook.Worksheets("Ruta SS").AutoFilter.Sort.SortFields.Add Key:= _
+Range("F3"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+xlSortNormal
+With ActiveWorkbook.Worksheets("Ruta SS").AutoFilter.Sort
+.Header = xlYes
+.MatchCase = False
+.Orientation = xlTopToBottom
+.SortMethod = xlPinYin
+End With
+MsgBox "Ruta trazada", vbOKOnly, "Completo"
+End Sub
+_____________________________________________________________________________
+Sub ETIQUETAS_1()
+Dim Message, Title, Default, MyValue
+Message = "Ingrese la celda del producto que desea etiquetar"
+Title = "Datos de la etiqueta"
+Default = "Line"
+MyValue = InputBox(Message, Title, Default)
+If MyValue = "" Then
+MsgBox "Proceso cancelado"
+Else
+Range("A" & MyValue).Select
+Selection.Copy
+Sheets("Etiquetas").Select
+Range("D12").Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+Sheets("Entradas").Select
+ActiveCell.Offset(0, 1).Select
+Selection.Copy
+Sheets("Etiquetas").Select
+Range("D16").Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+Sheets("Entradas").Select
+ActiveCell.Offset(0, 1).Select
+Selection.Copy
+Sheets("Etiquetas").Select
+Range("D14").Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+Sheets("Entradas").Select
+ActiveCell.Offset(0, 1).Select
+Selection.Copy
+Sheets("Etiquetas").Select
+Range("D13").Select
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Application.CutCopyMode = False
+Range("D15").Select
+ActiveCell.FormulaR1C1 = "=TODAY()"
+Range("D15").Select
+Selection.Copy
+Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+:=False, Transpose:=False
+Range("B2:L9").Select
+End If
+Dim Respuesta As Integer
+Respuesta = MsgBox("¿Los datos son correctos?", vbOKCancel, "Verifique la información")
+If Respuesta = vbOK Then
+Message = "Ingrese numero de etiquetas"
+Title = "Datos de la etiqueta"
+Default = "cantidad"
+MyValue = InputBox(Message, Title, Default)
+Application.Dialogs(xlDialogPrinterSetup).Show
+Selection.PrintOut copies:=MyValue
+Sheets("Entradas").Select
+Else
+UserForm4.Show
+End If
+End Sub
